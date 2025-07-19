@@ -58,6 +58,7 @@ function MasteryScale(props: MasteryScaleProps) {
 
 export default function Home() {
 
+  const [noMoreCards, setNoMoreCards] = useState<boolean>(false);
   const [currentCardId, setCurrentCardId] = useState<string>("");
   const [currentCardHint, setCurrentCardHint] = useState<string | null>(null);
   const [currentCardAnswer, setCurrentCardAnswer] = useState<string>("");
@@ -76,6 +77,7 @@ export default function Home() {
   const getNewCard = async () => {
     setLoading(true);
     setError(null);
+    setNoMoreCards(false);
     setCurrentCardHint(null);
     setCurrentCardId("");
     setCurrentCardAnswer("");
@@ -87,18 +89,22 @@ export default function Home() {
     try {
       const res = await fetch('http://localhost:8080/api/cards/randomsr');
 
-      if (!res.ok) {
+      if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-
-      const data = await res.json();
-      setCurrentCardHint(data['hint']);
-      setCurrentCardAnswer(data['answer']);
-      setCurrentCardId(data['id'])
-      setCurrentCardLastCorrect(data['lastCorrect']);
-      setCurrentCardStreak(data['streak']);
-      setCurrentCardMasteryLevel(data['masteryLevel']);
-      console.log(currentCardMasteryLevel)
+      if (res.status == 404){
+        setNoMoreCards(true)
+      }
+      else {
+        const data = await res.json();
+        setCurrentCardHint(data['hint']);
+        setCurrentCardAnswer(data['answer']);
+        setCurrentCardId(data['id'])
+        setCurrentCardLastCorrect(data['lastCorrect']);
+        setCurrentCardStreak(data['streak']);
+        setCurrentCardMasteryLevel(data['masteryLevel']);
+        console.log(currentCardMasteryLevel)
+      }
 
     } catch (err: any) {
       setError(err.message);
@@ -141,6 +147,7 @@ export default function Home() {
       <h1 className="text-2xl font-bold mb-4">
         {loading && <p></p>}
         {error && <p className="text-red-500">Error: {error}</p>}
+        {noMoreCards &&  <p className="text-green-300"> You've gone through all your cards for now, come back later! </p>}
         {currentCardHint && <p className="text-green-600"> {currentCardHint}</p>}
       </h1>
 
@@ -160,22 +167,30 @@ export default function Home() {
           </button>
         </div>  
       ) : (
-        <button
-          onClick={toggleShowAnswer}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Show Answer
-        </button>
+        <div>
+        {!noMoreCards &&
+          <button
+            onClick={toggleShowAnswer}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              Show Answer
+          </button>
+        }
+        </div>
       )}
       <div>
+        {!noMoreCards &&
         <div>
-        Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
+          <div>
+          Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
+          </div>
+          <div>
+          Streak: {currentCardStreak}
+          </div>
+          <div>
+          Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
+          </div>
         </div>
-        <div>
-        Streak: {currentCardStreak}
-        </div>
-        <div>
-        Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
-        </div>
+      }
       </div>
     </main>
   );
