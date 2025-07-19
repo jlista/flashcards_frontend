@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import Header from "./header";
+import Card from "./card";
+import Button from "./button";
 
 interface DaysAgoProps {
   date: Date | null
@@ -144,54 +147,70 @@ export default function Home() {
     
   return (
    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-4">
-        {loading && <p></p>}
-        {error && <p className="text-red-500">Error: {error}</p>}
-        {noMoreCards &&  <p className="text-green-300"> You've gone through all your cards for now, come back later! </p>}
-        {currentCardHint && <p className="text-green-600"> {currentCardHint}</p>}
-      </h1>
+    <Header></Header>
+    <div className="justify-self-center w-120">
+      <Card>
+        <div className="flex flex-col w-full">
+          <h1 className="text-2xl font-bold mb-1">
+            {loading && <p></p>}
+            {error && <p className="text-red-500">Error: {error}</p>}
+            {noMoreCards &&  <p className="text-inherit-300"> You've gone through all your cards for now, come back later! </p>}
+            {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
+          </h1>
+          <hr className="mb-2 opacity-30"></hr>
+          <div className="flex flex-row">
+            <div className="w-full">
+              <div className="h-25">
+                {showAnswer ? (
+                  <div>
+                    {currentCardAnswer && <p className="text-inherit-600">{currentCardAnswer}</p>}
 
-      {showAnswer ? (
-        <div className="mt-4">
-          {currentCardAnswer && <p className="text-green-600">{currentCardAnswer}</p>}
+                  </div>  
+                ) : (<br />)}
+              </div>
 
-          <button
-            onClick={() => {answerCard(currentCardId, true)}}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Correct
-          </button>
-          <button
-            onClick={() => {answerCard(currentCardId, false)}}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Incorrect
-          </button>
-        </div>  
-      ) : (
-        <div>
-        {!noMoreCards &&
-          <button
-            onClick={toggleShowAnswer}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Show Answer
-          </button>
-        }
+              <div>
+              {showAnswer ? (
+                <div>
+                  <Button onClick={() => {answerCard(currentCardId, true)}}>
+                      Correct
+                  </Button>
+                  <Button onClick={() => {answerCard(currentCardId, false)}}>
+                      Incorrect
+                  </Button>
+                  </div>
+              ) : (
+                <div>
+              {!noMoreCards &&
+                  <Button onClick={toggleShowAnswer}>
+                      Show Answer
+                  </Button>
+                }
+                </div>
+              )}
+              </div>
+              </div>
+              
+            <div className="place-self-end w-41">
+              {!noMoreCards &&
+              <div className="text-neutral-400 text-sm antialiased">
+                <div>
+                Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
+                </div>
+                <div>
+                Streak: {currentCardStreak}
+                </div>
+                <div>
+                Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
+                </div>
+              </div>
+            }
+            </div>
+            </div>
+          </div>
+        </Card>
         </div>
-      )}
-      <div>
-        {!noMoreCards &&
-        <div>
-          <div>
-          Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
-          </div>
-          <div>
-          Streak: {currentCardStreak}
-          </div>
-          <div>
-          Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
-          </div>
-        </div>
-      }
-      </div>
+
     </main>
   );
 }
