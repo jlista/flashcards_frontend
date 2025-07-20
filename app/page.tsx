@@ -10,18 +10,38 @@ interface DaysAgoProps {
 }
 function DaysAgo(props: DaysAgoProps) {
   const today = new Date();
+  const defaultDate = new Date(0);
+  var timeDeltaStr = ""
   if (props.date != null) {
     var datediff = today.getTime() - new Date(props.date).getTime(); 
     const daysAgo = Math.floor(datediff / (24*60*60*1000))
-    return (
-      <div>
-      {daysAgo} days ago
-      </div>
-    );
+    const hoursAgo = Math.floor(datediff / (60*60*1000))
+    const minutesAgo = Math.floor(datediff / (60*1000))
+    if (daysAgo == 1) {
+      timeDeltaStr = "Yesterday"
+    }
+    else if (daysAgo > 1) {
+      timeDeltaStr = daysAgo.toString() + " days ago"
+    }
+    else if (hoursAgo == 1) {
+      timeDeltaStr = "1 hour ago"
+    }
+    else if (hoursAgo > 1) {
+      timeDeltaStr = hoursAgo.toString() + " hours ago" 
+    }
+    else if (minutesAgo <= 1) {
+      timeDeltaStr = "Just now"
+    }
+    else {
+      timeDeltaStr = minutesAgo.toString() + " minutes ago"
+    }
+  }
+  else {
+    timeDeltaStr = "Never"
   }
   return (
     <div>
-      Never
+      {timeDeltaStr}
     </div>
   )
 
