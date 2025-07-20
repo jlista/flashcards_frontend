@@ -21,19 +21,19 @@ function DaysAgo(props: DaysAgoProps) {
       timeDeltaStr = "Yesterday"
     }
     else if (daysAgo > 1) {
-      timeDeltaStr = daysAgo.toString() + "days ago"
+      timeDeltaStr = daysAgo.toString() + " days ago"
     }
     else if (hoursAgo == 1) {
       timeDeltaStr = "1 hour ago"
     }
     else if (hoursAgo > 1) {
-      timeDeltaStr = hoursAgo.toString() + "hours ago" 
+      timeDeltaStr = hoursAgo.toString() + " hours ago" 
     }
     else if (minutesAgo <= 1) {
       timeDeltaStr = "Just now"
     }
     else {
-      timeDeltaStr = minutesAgo.toString() + "minutes ago"
+      timeDeltaStr = minutesAgo.toString() + " minutes ago"
     }
   }
   else {
