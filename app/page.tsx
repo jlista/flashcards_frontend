@@ -165,7 +165,6 @@ export default function Home() {
     
   return (
     <main className="p-8">
-      <Header></Header>
       <div className="justify-self-center w-120">
         <Card>
           <div className="flex flex-col w-full">
