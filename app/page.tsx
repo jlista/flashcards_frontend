@@ -126,7 +126,6 @@ export default function Home() {
         setCurrentCardLastCorrect(data['lastCorrect']);
         setCurrentCardStreak(data['streak']);
         setCurrentCardMasteryLevel(data['masteryLevel']);
-        console.log(currentCardMasteryLevel)
       }
 
     } catch (err: any) {
@@ -139,7 +138,6 @@ export default function Home() {
   const answerCard = async (id: string, isCorrect: boolean) => {
     setLoading(true);
     setError(null);
-    console.log(id)
     const requestOptions = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -147,7 +145,7 @@ export default function Home() {
     };
     try {
       
-      const res = await fetch(`http://localhost:8080/api/cards/${id}`, requestOptions);
+      const res = await fetch(`http://localhost:8080/api/cards/answer?id=${id}`, requestOptions);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -166,71 +164,69 @@ export default function Home() {
   }, []);
     
   return (
-   <main className="p-8">
-    <Header></Header>
-    <div className="justify-self-center w-120">
-      <Card>
-        <div className="flex flex-col w-full">
-          <h1 className="text-2xl font-bold mb-1">
-            {loading && <p></p>}
-            {error && <p className="text-red-500">Error: {error}</p>}
-            {noMoreCards &&  <p className="text-inherit-300"> You've gone through all your cards for now, come back later! </p>}
-            {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
-          </h1>
-          <hr className="mb-2 opacity-30"></hr>
-          <div className="flex flex-row">
-            <div className="w-full">
-              <div className="h-25">
+    <main className="p-8">
+      <Header></Header>
+      <div className="justify-self-center w-120">
+        <Card>
+          <div className="flex flex-col w-full">
+            <h1 className="text-2xl font-bold mb-1">
+              {loading && <p></p>}
+              {error && <p className="text-red-500">Error: {error}</p>}
+              {noMoreCards &&  <p className="text-inherit-300"> You've gone through all your cards for now, come back later! </p>}
+              {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
+            </h1>
+            <hr className="mb-2 opacity-30"></hr>
+            <div className="flex flex-row">
+              <div className="w-full">
+                <div className="h-25">
+                  {showAnswer ? (
+                    <div>
+                      {currentCardAnswer && <p className="text-inherit-600">{currentCardAnswer}</p>}
+                    </div>  
+                  ) : (<br />)}
+                </div>
+
+                <div>
                 {showAnswer ? (
                   <div>
-                    {currentCardAnswer && <p className="text-inherit-600">{currentCardAnswer}</p>}
-
-                  </div>  
-                ) : (<br />)}
-              </div>
-
-              <div>
-              {showAnswer ? (
-                <div>
-                  <Button onClick={() => {answerCard(currentCardId, true)}}>
-                      Correct
-                  </Button>
-                  <Button onClick={() => {answerCard(currentCardId, false)}}>
-                      Incorrect
-                  </Button>
+                    <Button onClick={() => {answerCard(currentCardId, true)}}>
+                        Correct
+                    </Button>
+                    <Button onClick={() => {answerCard(currentCardId, false)}}>
+                        Incorrect
+                    </Button>
                   </div>
-              ) : (
-                <div>
-              {!noMoreCards &&
-                  <Button onClick={toggleShowAnswer}>
-                      Show Answer
-                  </Button>
+                ) : (
+                  <div>
+                    {!noMoreCards &&
+                      <Button onClick={toggleShowAnswer}>
+                          Show Answer
+                      </Button>
+                    }
+                  </div>
+                )}
+                </div>
+              </div>
+                
+              <div className="place-self-end w-41">
+                {!noMoreCards &&
+                  <div className="text-neutral-400 text-sm antialiased">
+                    <div>
+                      Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
+                    </div>
+                    <div>
+                      Streak: {currentCardStreak}
+                    </div>
+                    <div>
+                      Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
+                    </div>
+                  </div>
                 }
-                </div>
-              )}
               </div>
-              </div>
-              
-            <div className="place-self-end w-41">
-              {!noMoreCards &&
-              <div className="text-neutral-400 text-sm antialiased">
-                <div>
-                Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
-                </div>
-                <div>
-                Streak: {currentCardStreak}
-                </div>
-                <div>
-                Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
-                </div>
-              </div>
-            }
-            </div>
             </div>
           </div>
         </Card>
-        </div>
-
+      </div>
     </main>
   );
 }
