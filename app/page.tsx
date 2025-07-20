@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Header from "./header";
 import Card from "./card";
 import Button from "./button";
 
