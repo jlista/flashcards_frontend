@@ -96,7 +96,7 @@ export default function Home() {
     setShowAnswer(true);
   }
 
-  const getNewCard = async () => {
+  const getNewCard = async (lastCardId: String | null) => {
     setLoading(true);
     setError(null);
     setNoMoreCards(false);
@@ -109,8 +109,13 @@ export default function Home() {
     setShowAnswer(false);
 
     try {
-      const res = await fetch('http://localhost:8080/api/cards/randomsr');
-
+      var res;
+      if (lastCardId == ""){
+        res = await fetch(`http://localhost:8080/api/cards/randomsr`);
+      }
+      else {
+        res = await fetch(`http://localhost:8080/api/cards/randomsr?lastAnswered=${lastCardId}`);
+      }
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -149,7 +154,7 @@ export default function Home() {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
 
-      getNewCard();
+      getNewCard(id);
     }
      catch (err: any) {
       setError(err.message);
@@ -159,7 +164,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getNewCard()
+    getNewCard(null)
   }, []);
     
   return (
