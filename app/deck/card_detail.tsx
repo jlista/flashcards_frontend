@@ -19,7 +19,6 @@ export default function CardDetail(props: {
         props.onCardUpdate(props.id);
     }
 
-
     return (            
         <li className="pb-3 sm:pb-2 sm:pt-2">
             <div className="flex items-center space-x-4 rtl:space-x-reverse">
