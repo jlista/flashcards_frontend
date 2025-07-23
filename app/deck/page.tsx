@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Flashcard } from "../flashcard";
 import CardDetail from "./card_detail";
 import Button from "../button";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { get } from "http";
 
 export default function Deck({
   children,
@@ -14,8 +13,8 @@ export default function Deck({
 }>) {
 
   const [allCards, setAllCards] = useState<Array<Flashcard>>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [addCardAccordionClass, setAddCardAccordionClass] = useState<string>("hidden");
+  const [loadCardsError, setLoadCardsError] = useState<string | null>(null);
+  const [updateCardsError, setUpdateCardsError] = useState<string | null>(null);
   const [cardToModify, setCardToModify] = useState<Flashcard | undefined>(null);
 
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -45,8 +44,9 @@ export default function Deck({
         }
     }
     catch (err: any) {
-    //setError(err.message);
-    } finally {
+      setUpdateCardsError(err.message);
+    } 
+    finally {
       setIsDeleteConfirmOpen(false);
       getAllCards();
     }
@@ -76,9 +76,10 @@ export default function Deck({
         throw new Error(`HTTP error! status: ${res.status}`);
       }
     }
-     catch (err: any) {
-      setError(err.message);
-    } finally {
+    catch (err: any) {
+      setUpdateCardsError(err.message);
+    } 
+    finally {
       setUpdateAnswerInputValue("")
       setUpdateHintInputValue("")
       setIsUpdateCardOpen(false);
@@ -105,7 +106,7 @@ export default function Deck({
       }
     }
      catch (err: any) {
-      setError(err.message);
+      setUpdateCardsError(err.message);
     } finally {
       setAddAnswerInputValue("")
       setAddHintInputValue("")
@@ -115,7 +116,7 @@ export default function Deck({
 
   const getAllCards = async () => {
     // setLoading(true);
-    setError(null);
+    setLoadCardsError(null);
     setAllCards([]);
 
     try {
@@ -130,7 +131,7 @@ export default function Deck({
       }
 
     } catch (err: any) {
-      setError(err.message);
+      setLoadCardsError(err.message);
     } finally {
       // setLoading(false);
     }
@@ -154,6 +155,7 @@ export default function Deck({
           <DialogPanel className="max-w-lg min-w-lg space-y-4 border border-gray-500 p-12 bg-gray-800 rounded-xl shadow-lg">
             <DialogTitle className="font-bold text-red-300">Delete Card? This cannot be undone!</DialogTitle>
             <Description><b>{cardToModify?.hint}</b> - {cardToModify?.answer}</Description>
+            {updateCardsError && <p className="text-red-500">Error: {loadCardsError}</p>}
             <div>
               <Button onClick={() => deleteCard(cardToModify?.id)}>Delete</Button>
               <Button onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
@@ -183,12 +185,13 @@ export default function Deck({
               className="block p-2.5 w-80 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </textarea>
             </div>
-              <Button onClick={handleNewCardSubmit}>
-                Save
-              </Button>
-              <Button onClick={() => setIsAddCardOpen(false)}>
-                Cancel
-              </Button>
+            {updateCardsError && <p className="text-red-500">Error: {loadCardsError}</p>}
+            <Button onClick={handleNewCardSubmit}>
+              Save
+            </Button>
+            <Button onClick={() => setIsAddCardOpen(false)}>
+              Cancel
+            </Button>
           </DialogPanel>
         </div>
       </Dialog>
@@ -213,12 +216,13 @@ export default function Deck({
               className="block p-2.5 w-80 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               </textarea>
             </div>
-              <Button onClick={() => {handleUpdateCardSubmit(cardToModify?.id)}}>
-                Save
-              </Button>
-              <Button onClick={() => setIsUpdateCardOpen(false)}>
-                Cancel
-              </Button>
+            {updateCardsError && <p className="text-red-500">Error: {loadCardsError}</p>}
+            <Button onClick={() => {handleUpdateCardSubmit(cardToModify?.id)}}>
+              Save
+            </Button>
+            <Button onClick={() => setIsUpdateCardOpen(false)}>
+              Cancel
+            </Button>
           </DialogPanel>
         </div>
       </Dialog>
@@ -233,19 +237,20 @@ export default function Deck({
               </svg>
             </button>
           </h2>
-        <div id="accordion-collapse-body-1" className={addCardAccordionClass} aria-labelledby="accordion-collapse-heading-1">
-
         </div>
-      </div>
-      <ul>
-        {allCards.map((element: any) => {
-          return (
-            <CardDetail key={element['id']} id={element['id']} hint={element['hint']} answer={element['answer']}
-            onCardUpdate={(id: string) => handleEditCard(id)} onCardDelete={(id: string) => promptCardDeletion(id)}>
-            </CardDetail> 
-          )
-        })}
-      </ul>   
+        {loadCardsError ? ( 
+          <p className="text-red-500">Error: {loadCardsError}</p>
+        ):( 
+          <ul>
+            {allCards.map((element: any) => {
+              return (
+                <CardDetail key={element['id']} id={element['id']} hint={element['hint']} answer={element['answer']}
+                onCardUpdate={(id: string) => handleEditCard(id)} onCardDelete={(id: string) => promptCardDeletion(id)}>
+                </CardDetail> 
+              )
+            })}
+          </ul>   
+        )}
       </div>     
     </div>
   )
