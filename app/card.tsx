@@ -6,7 +6,7 @@ export default function Card({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex max-w-sm p-6 h-full bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <div className="flex p-6 h-full bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       {children}
     </div>
   );
