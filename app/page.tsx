@@ -66,7 +66,7 @@ export default function Home() {
   const [currentCardStreak, setCurrentCardStreak] = useState<number>(0);
   const [currentCardMasteryLevel, setCurrentCardMasteryLevel] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
 
   const toggleShowAnswer = () => {
@@ -139,30 +139,43 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="p-8">
-      <div className="justify-self-center w-120">
-        <Card>
-          <div className="flex flex-col w-full">
-            <h1 className="text-2xl font-bold mb-1">
-              {loading && <p></p>}
-              {error && <p className="text-red-500">Error: {error}</p>}
-              {noMoreCards && (
-                <p className="text-inherit-300">{`You've gone through all your cards for now, come back later!`}</p>
-              )}
-              {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
-            </h1>
+    <div className="justify-self-center w-140 h-90 p-8">
+      <Card>
+        {loading ? (
+          <div role="status" className="max-w-sm animate-pulse w-full h-50">
+            <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4 mt-2"></div>
             <hr className="mb-2 opacity-30"></hr>
-            <div className="flex flex-row">
-              <div className="w-full">
-                <div className="h-25">
-                  {showAnswer ? (
-                    <div>{currentCardAnswer && <p className="text-inherit-600">{currentCardAnswer}</p>}</div>
-                  ) : (
-                    <br />
-                  )}
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5 mt-4"></div>
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[270px] mb-2.5"></div>
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[240px] mb-2.5"></div>
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px]"></div>
+            <span className="sr-only">Loading...</span>
+          </div>
+        ) : (
+          <div className="flex flex-col w-full">
+            <div className="flex flex-col flex-none w-full h-13">
+              <h1 className="text-2xl font-bold mb-1">
+                {error && <p className="text-red-500">Error: {error}</p>}
+                {noMoreCards && (
+                  <p className="text-inherit-300">{`You've gone through all your cards for now, come back later!`}</p>
+                )}
+                {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
+              </h1>
+              <hr className="opacity-30"></hr>
+            </div>
+            <div className="flex flex-row flex-1 w-full grow text-inherit-600 overflow-auto">
+              <div className="flex flex-col flex-1 h-full grow overflow-auto">
+                <div className="flex flex-1 w-full grow overflow-auto wrap-anywhere">
+                  <div className="grow overflow-auto">
+                    {showAnswer && (
+                      <div>
+                        {currentCardAnswer && <p className="text-inherit-600 wrap-break-word">{currentCardAnswer}</p>}
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div>
+                <div className="flex flex-none w-full h-15">
                   {showAnswer ? (
                     <div>
                       <Button
@@ -185,10 +198,9 @@ export default function Home() {
                   )}
                 </div>
               </div>
-
-              <div className="place-self-end w-41">
+              <div className="flex flex-none h-full ml-5">
                 {!noMoreCards && (
-                  <div className="text-neutral-400 text-sm antialiased">
+                  <div className="text-neutral-400 text-sm antialiased place-self-end">
                     <div>
                       Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
                     </div>
@@ -201,8 +213,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </Card>
-      </div>
-    </main>
+        )}
+      </Card>
+    </div>
   );
 }
