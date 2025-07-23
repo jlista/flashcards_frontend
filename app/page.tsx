@@ -41,19 +41,19 @@ interface MasteryScaleProps {
 }
 function MasteryScale(props: MasteryScaleProps) {
   if (props.masteryLevel == 0) {
-    return <Image src="/progress_slider1.png" alt="level 1" />;
+    return <Image src="/progress_slider1.png" alt="level 1" width="75" height="35" priority />;
   }
   if (props.masteryLevel == 1) {
-    return <Image src="/progress_slider2.png" alt="level 2" />;
+    return <Image src="/progress_slider2.png" alt="level 2" width="75" height="35" priority />;
   }
   if (props.masteryLevel == 2) {
-    return <Image src="/progress_slider3.png" alt="level 3" />;
+    return <Image src="/progress_slider3.png" alt="level 3" width="75" height="35" priority />;
   }
   if (props.masteryLevel == 3) {
-    return <Image src="/progress_slider4.png" alt="level 4" />;
+    return <Image src="/progress_slider4.png" alt="level 4" width="75" height="35" priority />;
   }
   if (props.masteryLevel == 4) {
-    return <Image src="/progress_slider5.png" alt="level 5" />;
+    return <Image src="/progress_slider5.png" alt="level 5" width="75" height="35" priority />;
   }
 }
 
