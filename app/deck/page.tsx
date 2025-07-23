@@ -79,7 +79,7 @@ export default function Deck() {
         onClose={() => setIsUpdateCardOpen(false)}
       ></UpdateCardModal>
 
-      <div className="max-w-5xl mt-12 divide-y divide-gray-200 dark:divide-gray-700 justify-self-center">
+      <div className="w-5xl mt-12 divide-y divide-gray-200 dark:divide-gray-700 justify-self-center">
         <div id="accordion-collapse" data-accordion="collapse">
           <h2 id="accordion-collapse-heading-1" onClick={() => setIsAddCardOpen(true)}>
             <button
