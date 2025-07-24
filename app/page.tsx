@@ -103,7 +103,6 @@ export default function Home() {
         setCurrentCardAnswer(data['answer']);
         setCurrentCardId(data['id']);
         setCurrentCardLastCorrect(data['lastCorrect']);
-        console.log(data['lastCorrect']);
         setCurrentCardStreak(data['streak']);
         setCurrentCardMasteryLevel(data['masteryLevel']);
       }

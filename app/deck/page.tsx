@@ -52,13 +52,11 @@ export default function Deck() {
         setAllCards(data);
         let numReady = 0;
         data.forEach((c: Flashcard) => {
-          console.log(c);
           if (c['isReadyToReview']) {
             numReady += 1;
           }
         });
         setNumCardsReady(numReady);
-        console.log(data);
       }
     } catch (err: any) {
       setLoadCardsError(err.message);
