@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import Button from '../button';
+import Card from '../card';
 import { Flashcard } from '../flashcard';
 import AddCardModal from './add_card_modal';
 import CardDetail from './card_detail';
@@ -10,6 +12,7 @@ import UpdateCardModal from './update_card_modal';
 
 export default function Deck() {
   const [allCards, setAllCards] = useState<Array<Flashcard>>([]);
+  const [numCardsReady, setNumCardsReady] = useState<number>(0);
   const [loadCardsError, setLoadCardsError] = useState<string | null>(null);
   const [cardToModify, setCardToModify] = useState<Flashcard | undefined>(undefined);
 
@@ -40,13 +43,20 @@ export default function Deck() {
     setAllCards([]);
 
     try {
-      const res = await fetch('http://localhost:8080/api/cards/allPossible');
+      const res = await fetch('http://localhost:8080/api/cards');
 
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
       } else {
-        const data = await res.json();
+        const data: Array<Flashcard> = await res.json();
         setAllCards(data);
+        let numReady = 0;
+        data.forEach((c: Flashcard) => {
+          if (c['isReadyToReview']) {
+            numReady += 1;
+          }
+        });
+        setNumCardsReady(numReady);
       }
     } catch (err: any) {
       setLoadCardsError(err.message);
@@ -79,54 +89,39 @@ export default function Deck() {
         onClose={() => setIsUpdateCardOpen(false)}
       ></UpdateCardModal>
 
-      <div className="w-5xl mt-12 divide-y divide-gray-200 dark:divide-gray-700 justify-self-center">
-        <div id="accordion-collapse" data-accordion="collapse">
-          <h2 id="accordion-collapse-heading-1" onClick={() => setIsAddCardOpen(true)}>
-            <button
-              type="button"
-              className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
-              data-accordion-target="#accordion-collapse-body-1"
-              aria-expanded="true"
-              aria-controls="accordion-collapse-body-1"
-            >
-              <span>Add a card</span>
-              <svg
-                data-accordion-icon
-                className="w-3 h-3 rotate-180 shrink-0"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 10 6"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 5 5 1 1 5"
-                />
-              </svg>
-            </button>
-          </h2>
+      <div className="flex flex-row w-full h-full gap-5">
+        <div className="w-5xl mt-12 divide-y divide-gray-200 dark:divide-gray-700 flex-1">
+          {loadCardsError ? (
+            <p className="text-red-500">Error: {loadCardsError}</p>
+          ) : (
+            <ul>
+              {allCards.map((element: any) => {
+                return (
+                  <CardDetail
+                    key={element['id']}
+                    id={element['id']}
+                    hint={element['hint']}
+                    answer={element['answer']}
+                    isReadyToReview={element['isReadyToReview']}
+                    onCardUpdate={(id: string) => handleEditCard(id)}
+                    onCardDelete={(id: string) => promptCardDeletion(id)}
+                  ></CardDetail>
+                );
+              })}
+            </ul>
+          )}
         </div>
-        {loadCardsError ? (
-          <p className="text-red-500">Error: {loadCardsError}</p>
-        ) : (
-          <ul>
-            {allCards.map((element: any) => {
-              return (
-                <CardDetail
-                  key={element['id']}
-                  id={element['id']}
-                  hint={element['hint']}
-                  answer={element['answer']}
-                  onCardUpdate={(id: string) => handleEditCard(id)}
-                  onCardDelete={(id: string) => promptCardDeletion(id)}
-                ></CardDetail>
-              );
-            })}
-          </ul>
-        )}
+        <div className="flex flex-none w-40 h-full justify-center">
+          <div className="fixed mt-16">
+            <Card>
+              <div className="flex flex-col">
+                <Button onClick={() => setIsAddCardOpen(true)}>Add Card</Button>
+                <p># cards: {allCards.length}</p>
+                <p># ready: {numCardsReady}</p>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

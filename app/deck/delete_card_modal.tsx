@@ -35,7 +35,7 @@ export default function DeleteCardModal(props: {
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel className="max-w-lg min-w-lg space-y-4 border border-gray-500 p-12 bg-gray-800 rounded-xl shadow-lg">
           <DialogTitle className="font-bold text-red-300">Delete Card? This cannot be undone!</DialogTitle>
-          <Description>
+          <Description className="wrap-break-word">
             <b>{props.cardToDelete?.hint}</b> - {props.cardToDelete?.answer}
           </Description>
           {deleteCardsError && <p className="text-red-500">Error: {deleteCardsError}</p>}
