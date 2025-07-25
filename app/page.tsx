@@ -87,7 +87,7 @@ export default function Home() {
 
     try {
       let res;
-      if (lastCardId == '') {
+      if (lastCardId == null) {
         res = await fetch(`http://localhost:8080/api/cards/randomsr`);
       } else {
         res = await fetch(`http://localhost:8080/api/cards/randomsr?lastAnswered=${lastCardId}`);
