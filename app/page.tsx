@@ -88,9 +88,9 @@ export default function Home() {
     try {
       let res;
       if (lastCardId == null) {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr`);
+        res = await fetch(`http://localhost:8080/api/cards/randomsr?userDeckId=2`);
       } else {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr?lastAnswered=${lastCardId}`);
+        res = await fetch(`http://localhost:8080/api/cards/randomsr?userDeckId=2&lastAnswered=${lastCardId}`);
       }
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -99,9 +99,9 @@ export default function Home() {
         setNoMoreCards(true);
       } else {
         const data = await res.json();
-        setCurrentCardHint(data['hint']);
+        setCurrentCardHint(data['clue']);
         setCurrentCardAnswer(data['answer']);
-        setCurrentCardId(data['id']);
+        setCurrentCardId(data['cardId']);
         setCurrentCardLastCorrect(data['lastCorrect']);
         setCurrentCardStreak(data['streak']);
         setCurrentCardMasteryLevel(data['masteryLevel']);
@@ -122,7 +122,7 @@ export default function Home() {
       body: JSON.stringify(isCorrect),
     };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards/answer?id=${id}`, requestOptions);
+      const res = await fetch(`http://localhost:8080/api/cards/answer?cardId=${id}&userDeckId=2`, requestOptions);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

@@ -42,7 +42,7 @@ export default function UpdateCardModal(props: {
 
   useEffect(() => {
     if (props.isUpdateCardOpen && props.cardToModify) {
-      setUpdateHintInputValue(props.cardToModify.hint);
+      setUpdateHintInputValue(props.cardToModify.clue);
       setUpdateAnswerInputValue(props.cardToModify.answer);
     }
   }, [props.cardToModify, props.isUpdateCardOpen]);
@@ -82,7 +82,7 @@ export default function UpdateCardModal(props: {
           {updateCardsError && <p className="text-red-500">Error: {updateCardsError}</p>}
           <Button
             onClick={() => {
-              handleUpdateCardSubmit(props.cardToModify?.id);
+              handleUpdateCardSubmit(props.cardToModify?.cardId);
             }}
           >
             Save

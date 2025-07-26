@@ -23,7 +23,7 @@ export default function Deck() {
   const promptCardDeletion = (id: string) => {
     setCardToModify(
       allCards.filter((f: Flashcard) => {
-        return f.id == id;
+        return f.cardId == id;
       })[0]
     );
     setIsDeleteConfirmOpen(true);
@@ -31,7 +31,7 @@ export default function Deck() {
 
   const handleEditCard = (id: string) => {
     const card = allCards.find((f: Flashcard) => {
-      return f.id == id;
+      return f.cardId == id;
     });
     setIsUpdateCardOpen(true);
     setCardToModify(card);
@@ -43,13 +43,14 @@ export default function Deck() {
     setAllCards([]);
 
     try {
-      const res = await fetch('http://localhost:8080/api/cards');
+      const res = await fetch('http://localhost:8080/api/cards?userDeckId=2');
 
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
       } else {
         const data: Array<Flashcard> = await res.json();
         setAllCards(data);
+        console.log(data);
         let numReady = 0;
         data.forEach((c: Flashcard) => {
           if (c['isReadyToReview']) {
@@ -98,9 +99,9 @@ export default function Deck() {
               {allCards.map((element: any) => {
                 return (
                   <CardDetail
-                    key={element['id']}
-                    id={element['id']}
-                    hint={element['hint']}
+                    key={element['cardId']}
+                    id={element['cardId']}
+                    hint={element['clue']}
                     answer={element['answer']}
                     isReadyToReview={element['isReadyToReview']}
                     onCardUpdate={(id: string) => handleEditCard(id)}

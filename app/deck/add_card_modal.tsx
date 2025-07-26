@@ -20,7 +20,7 @@ export default function AddCardModal(props: { isAddCardOpen: boolean; onCardAdd:
       body: JSON.stringify(requestBody),
     };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards`, requestOptions);
+      const res = await fetch(`http://localhost:8080/api/cards?deckId=1`, requestOptions);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

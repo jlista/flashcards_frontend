@@ -36,11 +36,11 @@ export default function DeleteCardModal(props: {
         <DialogPanel className="max-w-lg min-w-lg space-y-4 border border-gray-500 p-12 bg-gray-800 rounded-xl shadow-lg">
           <DialogTitle className="font-bold text-red-300">Delete Card? This cannot be undone!</DialogTitle>
           <Description className="wrap-break-word">
-            <b>{props.cardToDelete?.hint}</b> - {props.cardToDelete?.answer}
+            <b>{props.cardToDelete?.clue}</b> - {props.cardToDelete?.answer}
           </Description>
           {deleteCardsError && <p className="text-red-500">Error: {deleteCardsError}</p>}
           <div>
-            <Button onClick={() => deleteCard(props.cardToDelete?.id)}>Delete</Button>
+            <Button onClick={() => deleteCard(props.cardToDelete?.cardId)}>Delete</Button>
             <Button onClick={() => props.onClose()}>Cancel</Button>
           </div>
         </DialogPanel>
