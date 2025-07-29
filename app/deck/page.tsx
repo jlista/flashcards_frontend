@@ -1,21 +1,22 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
+import { useDeck } from '../context/deck_context';
+import { useUser } from '../context/user_context';
+import { Flashcard } from '../model/flashcard';
 import Button from '../ui/button';
 import Card from '../ui/card';
-import { Flashcard } from '../model/flashcard';
 import AddCardModal from './add_card_modal';
 import CardDetail from './card_detail';
 import DeleteCardModal from './delete_card_modal';
 import UpdateCardModal from './update_card_modal';
-import { UserContext } from '../context/user_context';
-import { request } from 'http';
-import { useRouter } from 'next/navigation';
 
 export default function Deck() {
   const router = useRouter();
-  const userContext = useContext(UserContext);
+  const { user, setUser } = useUser();
+  const { deck, setDeck } = useDeck();
   const [allCards, setAllCards] = useState<Array<Flashcard>>([]);
   const [numCardsReady, setNumCardsReady] = useState<number>(0);
   const [loadCardsError, setLoadCardsError] = useState<string | null>(null);
@@ -48,11 +49,11 @@ export default function Deck() {
     setAllCards([]);
 
     try {
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json',  'Authorization': `Bearer ${userContext?.authToken}` },
-    };
-      const res = await fetch(`http://localhost:8080/api/cards?userDeckId=${userContext?.deck?.userDeckId}`, requestOptions);
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
+      };
+      const res = await fetch(`http://localhost:8080/api/cards?userDeckId=${deck?.userDeckId}`, requestOptions);
 
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -76,23 +77,20 @@ export default function Deck() {
   };
 
   useEffect(() => {
-    if (userContext?.userId) {
-      if (userContext?.deck?.deckId){
+    if (user?.userId) {
+      if (deck?.deckId) {
         getAllCards();
+      } else {
+        router.replace('/my_decks');
       }
-      else{
-        router.replace("/my_decks")
-      }
+    } else {
+      router.replace('/');
     }
-    else {
-        router.replace("/")
-    }
-  }, []);
-
+  });
 
   return (
     <div>
-      {userContext?.username}
+      {user?.username}
       <DeleteCardModal
         isDeleteConfirmOpen={isDeleteConfirmOpen}
         cardToDelete={cardToModify}
@@ -100,7 +98,7 @@ export default function Deck() {
         onClose={() => setIsDeleteConfirmOpen(false)}
       ></DeleteCardModal>
       <AddCardModal
-        deckId={userContext?.deck?.deckId}
+        deckId={deck?.deckId}
         isAddCardOpen={isAddCardOpen}
         onCardAdd={getAllCards}
         onClose={() => setIsAddCardOpen(false)}

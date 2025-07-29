@@ -1,74 +1,21 @@
 'use client';
 
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
 
+import { useDeck } from '../context/deck_context';
+import { useUser } from '../context/user_context';
+import { DeckCard } from '../model/deck_card';
 import Button from '../ui/button';
 import Card from '../ui/card';
-import { UserContext } from '../context/user_context';
-import { useRouter } from 'next/navigation';
-
-interface DaysAgoProps {
-  date: Date | null;
-}
-function DaysAgo(props: DaysAgoProps) {
-  const today = new Date();
-  let timeDeltaStr = '';
-  if (props.date != null) {
-    const datediff = today.getTime() - new Date(props.date).getTime();
-    const daysAgo = Math.floor(datediff / (24 * 60 * 60 * 1000));
-    const hoursAgo = Math.floor(datediff / (60 * 60 * 1000));
-    const minutesAgo = Math.floor(datediff / (60 * 1000));
-    if (daysAgo == 1) {
-      timeDeltaStr = 'Yesterday';
-    } else if (daysAgo > 1) {
-      timeDeltaStr = daysAgo.toString() + ' days ago';
-    } else if (hoursAgo == 1) {
-      timeDeltaStr = '1 hour ago';
-    } else if (hoursAgo > 1) {
-      timeDeltaStr = hoursAgo.toString() + ' hours ago';
-    } else if (minutesAgo <= 1) {
-      timeDeltaStr = 'Just now';
-    } else {
-      timeDeltaStr = minutesAgo.toString() + ' minutes ago';
-    }
-  } else {
-    timeDeltaStr = 'Never';
-  }
-  return <div>{timeDeltaStr}</div>;
-}
-
-interface MasteryScaleProps {
-  masteryLevel: number;
-}
-function MasteryScale(props: MasteryScaleProps) {
-  if (props.masteryLevel == 0) {
-    return <Image src="/progress_slider1.png" alt="level 1" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 1) {
-    return <Image src="/progress_slider2.png" alt="level 2" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 2) {
-    return <Image src="/progress_slider3.png" alt="level 3" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 3) {
-    return <Image src="/progress_slider4.png" alt="level 4" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 4) {
-    return <Image src="/progress_slider5.png" alt="level 5" width="75" height="35" priority />;
-  }
-}
+import CardStats from './card_stats';
 
 export default function Review() {
   const router = useRouter();
-  const userContext = useContext(UserContext);
+  const { user, setUser } = useUser();
+  const { deck, setDeck } = useDeck();
   const [noMoreCards, setNoMoreCards] = useState<boolean>(false);
-  const [currentCardId, setCurrentCardId] = useState<string>('');
-  const [currentCardHint, setCurrentCardHint] = useState<string | null>(null);
-  const [currentCardAnswer, setCurrentCardAnswer] = useState<string>('');
-  const [currentCardLastCorrect, setCurrentCardLastCorrect] = useState<Date | null>(null);
-  const [currentCardStreak, setCurrentCardStreak] = useState<number>(0);
-  const [currentCardMasteryLevel, setCurrentCardMasteryLevel] = useState<number>(0);
+  const [currentCard, setCurrentCard] = useState<DeckCard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
@@ -77,29 +24,26 @@ export default function Review() {
     setShowAnswer(true);
   };
 
-  const getNewCard = async (lastCardId: string | null) => {
+  const getNewCard = async (lastCardId: number | null) => {
     setLoading(true);
     setError(null);
     setNoMoreCards(false);
-    setCurrentCardHint(null);
-    setCurrentCardId('');
-    setCurrentCardAnswer('');
-    setCurrentCardLastCorrect(null);
-    setCurrentCardStreak(0);
-    setCurrentCardMasteryLevel(0);
+    setCurrentCard(null);
     setShowAnswer(false);
 
     try {
-        const requestOptions = {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userContext?.authToken}`},
-          
-        };
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
+      };
       let res;
       if (lastCardId == null) {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr?userDeckId=${userContext?.deck?.userDeckId}`, requestOptions);
+        res = await fetch(`http://localhost:8080/api/cards/randomsr?userDeckId=${deck?.userDeckId}`, requestOptions);
       } else {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr?userDeckId=${userContext?.deck?.userDeckId}&lastAnswered=${lastCardId}`, requestOptions);
+        res = await fetch(
+          `http://localhost:8080/api/cards/randomsr?userDeckId=${deck?.userDeckId}&lastAnswered=${lastCardId}`,
+          requestOptions
+        );
       }
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -107,31 +51,29 @@ export default function Review() {
       if (res.status == 404) {
         setNoMoreCards(true);
       } else {
-        const data = await res.json();
-        setCurrentCardHint(data['clue']);
-        setCurrentCardAnswer(data['answer']);
-        setCurrentCardId(data['cardId']);
-        setCurrentCardLastCorrect(data['lastCorrect']);
-        setCurrentCardStreak(data['streak']);
-        setCurrentCardMasteryLevel(data['masteryLevel']);
+        const data: DeckCard = await res.json();
+        setCurrentCard(data);
       }
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };    
+  };
 
-  const answerCard = async (id: string, isCorrect: boolean) => {
+  const answerCard = async (id: number, isCorrect: boolean) => {
     setLoading(true);
     setError(null);
     const requestOptions = {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json',  'Authorization': `Bearer ${userContext?.authToken}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
       body: JSON.stringify(isCorrect),
     };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards/answer?cardId=${id}&userDeckId=${userContext?.deck?.userDeckId}`, requestOptions);
+      const res = await fetch(
+        `http://localhost:8080/api/cards/answer?cardId=${id}&userDeckId=${deck?.userDeckId}`,
+        requestOptions
+      );
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -144,16 +86,14 @@ export default function Review() {
   };
 
   useEffect(() => {
-    if (userContext?.userId) {
-      if (userContext?.deck) {
+    if (user?.userId) {
+      if (deck?.userDeckId) {
         getNewCard(null);
+      } else {
+        router.replace('/my_decks');
       }
-      else {
-        router.replace("/my_decks")
-      }
-    }
-    else {
-        router.replace("/")
+    } else {
+      router.replace('/');
     }
   }, []);
 
@@ -179,7 +119,7 @@ export default function Review() {
                 {noMoreCards && (
                   <p className="text-inherit-300">{`You've gone through all your cards for now, come back later!`}</p>
                 )}
-                {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
+                {currentCard?.clue && <p className="text-inherit-600"> {currentCard?.clue}</p>}
               </h1>
               <hr className="opacity-30"></hr>
             </div>
@@ -189,24 +129,26 @@ export default function Review() {
                   <div className="grow overflow-auto">
                     {showAnswer && (
                       <div>
-                        {currentCardAnswer && <p className="text-inherit-600 wrap-break-word">{currentCardAnswer}</p>}
+                        {currentCard?.answer && (
+                          <p className="text-inherit-600 wrap-break-word">{currentCard?.answer}</p>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-none w-full h-15">
-                  {showAnswer ? (
+                  {showAnswer && currentCard ? (
                     <div>
                       <Button
                         onClick={() => {
-                          answerCard(currentCardId, true);
+                          answerCard(currentCard.cardId, true);
                         }}
                       >
                         Correct
                       </Button>
                       <Button
                         onClick={() => {
-                          answerCard(currentCardId, false);
+                          answerCard(currentCard.cardId, false);
                         }}
                       >
                         Incorrect
@@ -218,17 +160,7 @@ export default function Review() {
                 </div>
               </div>
               <div className="flex flex-none h-full ml-5">
-                {!noMoreCards && (
-                  <div className="text-neutral-400 text-sm antialiased place-self-end">
-                    <div>
-                      Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
-                    </div>
-                    <div>Streak: {currentCardStreak}</div>
-                    <div>
-                      Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
-                    </div>
-                  </div>
-                )}
+                {!noMoreCards && currentCard && <CardStats currentCard={currentCard}></CardStats>}
               </div>
             </div>
           </div>
