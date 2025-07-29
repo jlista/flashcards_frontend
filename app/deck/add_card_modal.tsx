@@ -1,9 +1,16 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
-import Button from '../button';
+import Button from '../ui/button';
+import { UserContext } from '../context/user_context';
 
-export default function AddCardModal(props: { isAddCardOpen: boolean; onCardAdd: () => void; onClose: () => void }) {
+export default function AddCardModal(props: { 
+    deckId: number | undefined;
+    isAddCardOpen: boolean; 
+    onCardAdd: () => void; 
+    onClose: () => void }) {
+
+  const userContext = useContext(UserContext);
   const [addCardsError, setAddCardsError] = useState<string | null>(null);
   const [addHintInputValue, setAddHintInputValue] = useState<string>('');
   const [addAnswerInputValue, setAddAnswerInputValue] = useState<string>('');
@@ -16,11 +23,11 @@ export default function AddCardModal(props: { isAddCardOpen: boolean; onCardAdd:
 
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json',  'Authorization': `Bearer ${userContext?.authToken}` },
       body: JSON.stringify(requestBody),
     };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards?deckId=1`, requestOptions);
+      const res = await fetch(`http://localhost:8080/api/cards?deckId=${props.deckId}&userId=${userContext?.userId}`, requestOptions);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

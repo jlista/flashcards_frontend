@@ -1,31 +1,43 @@
+'use client';
 import type { Metadata } from 'next';
 
 import './globals.css';
 
 import Link from 'next/link';
+import { useContext, useState } from 'react';
+import { UserContext } from './context/user_context';
+import { Deck } from './model/deck';
 
-export const metadata: Metadata = {
-  title: 'Flashcards App',
-  description: '',
-};
+// export const metadata: Metadata = {
+//   title: 'Flashcards App',
+//   description: '',
+// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+  const [username, setUsername] = useState<string | null>(null)
+  const [userId, setUserId] = useState<number | null>(null)
+  const [deck, setDeck] = useState<Deck | null>(null)
+  const [authToken, setAuthToken] =  useState<string | null>(null)
+
+
   return (
     <html lang="en">
       <body className="h-screen flex flex-col overflow-hidden">
         {/* Header */}
+        <UserContext value={{username, setUsername, userId, setUserId, deck, setDeck, authToken, setAuthToken}}>
         <header className="h-16 bg-gray-800 text-white flex items-center justify-center fixed top-0 left-0 right-0 z-10">
           <div className="flex flex-row space-x-4 w-full pl-5 pr-5">
             <div className="float-left text-xl">
               <Link href="/">Flashcards</Link>
             </div>
             <div className="space-x-4 opacity-75 grow">
-              <Link href="/deck">Deck</Link>
-              <Link href="/about">Help</Link>
+
             </div>
             <div className="relative inline-flex  float-right items-center justify-center w-10 h-10 bg-gray-100 rounded-full dark:bg-gray-600">
               <span className="font-medium text-gray-600 dark:text-gray-300">JL</span>
@@ -39,8 +51,8 @@ export default function RootLayout({
           <nav className="w-50 bg-gray-800 text-white p-4 overflow-y-auto">
             <ul className="space-y-2 font-medium">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/my_decks"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <svg
@@ -54,7 +66,7 @@ export default function RootLayout({
                     <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
                   </svg>
                   <span className="ms-3">My Decks</span>
-                </a>
+                </Link>
               </li>
               <li>
                 <a
@@ -127,6 +139,7 @@ export default function RootLayout({
             </ul>
           </div>
         </footer>
+      </UserContext>
       </body>
     </html>
   );

@@ -1,8 +1,9 @@
 import { Description, Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
-import Button from '../button';
-import { Flashcard } from '../flashcard';
+import Button from '../ui/button';
+import { Flashcard } from '../model/flashcard';
+import { UserContext } from '../context/user_context';
 
 export default function DeleteCardModal(props: {
   cardToDelete: Flashcard | undefined;
@@ -10,12 +11,13 @@ export default function DeleteCardModal(props: {
   onCardDelete: () => void;
   onClose: () => void;
 }) {
+  const userContext = useContext(UserContext);
   const [deleteCardsError, setDeleteCardsError] = useState<string | null>(null);
 
   const deleteCard = async (id: string | undefined) => {
     const requestOptions = {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json',  'Authorization': `Bearer ${userContext?.authToken}` },
     };
     try {
       const res = await fetch(`http://localhost:8080/api/cards/${id}`, requestOptions);

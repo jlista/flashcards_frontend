@@ -1,8 +1,9 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
-import Button from '../button';
-import { Flashcard } from '../flashcard';
+import Button from '../ui/button';
+import { Flashcard } from '../model/flashcard';
+import { UserContext } from '../context/user_context';
 
 export default function UpdateCardModal(props: {
   cardToModify: Flashcard | undefined;
@@ -10,6 +11,7 @@ export default function UpdateCardModal(props: {
   onCardUpdate: () => void;
   onClose: () => void;
 }) {
+  const userContext = useContext(UserContext);
   const [updateCardsError, setUpdateCardsError] = useState<string | null>(null);
   const [updateHintInputValue, setUpdateHintInputValue] = useState<string>('');
   const [updateAnswerInputValue, setUpdateAnswerInputValue] = useState<string>('');
@@ -22,7 +24,7 @@ export default function UpdateCardModal(props: {
 
     const requestOptions = {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userContext?.authToken}`},
       body: JSON.stringify(requestBody),
     };
     try {
