@@ -86,7 +86,7 @@ export default function Deck() {
     } else {
       router.replace('/');
     }
-  });
+  }, []);
 
   return (
     <div>
@@ -136,6 +136,7 @@ export default function Deck() {
           <div className="fixed mt-16">
             <Card>
               <div className="flex flex-col">
+                <Button onClick={() => router.replace('/review')}>Review Deck</Button>
                 <Button onClick={() => setIsAddCardOpen(true)}>Add Card</Button>
                 <p># cards: {allCards.length}</p>
                 <p># ready: {numCardsReady}</p>

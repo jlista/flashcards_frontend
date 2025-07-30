@@ -6,7 +6,7 @@ import { Deck } from '../model/deck';
 
 interface DeckContextType {
   deck: Deck | null;
-  setDeck: (deck: Deck) => void;
+  setDeck: (deck: Deck | null) => void;
 }
 
 const DeckContext = createContext<DeckContextType | undefined>(undefined);

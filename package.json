@@ -16,6 +16,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
+    "@ianvs/prettier-plugin-sort-imports": "4.5.1",
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -31,7 +33,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-prettier": "^0.0.0-empty",
     "globals": "^16.3.0",
-    "@ianvs/prettier-plugin-sort-imports": "4.5.1",
     "prettier-plugin-sort-imports": "^1.8.8",
     "prettier-plugin-sort-json": "^4.1.1",
     "tailwindcss": "^4",

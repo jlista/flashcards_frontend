@@ -3,5 +3,5 @@ export interface Deck {
   deckId: number;
   userId: number;
   deck_name: string;
-  deck_desc: number;
+  deck_desc: string;
 }
