@@ -1,8 +1,10 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { useEffect, useState } from 'react';
 
-import Button from '../button';
-import { Flashcard } from '../flashcard';
+import { useUser } from '../context/user_context';
+import { Flashcard } from '../model/flashcard';
+import Button from '../ui/button';
+import { HttpService } from '../service/http_service';
 
 export default function UpdateCardModal(props: {
   cardToModify: Flashcard | undefined;
@@ -10,9 +12,11 @@ export default function UpdateCardModal(props: {
   onCardUpdate: () => void;
   onClose: () => void;
 }) {
+  const { user, setUser } = useUser();
   const [updateCardsError, setUpdateCardsError] = useState<string | null>(null);
   const [updateHintInputValue, setUpdateHintInputValue] = useState<string>('');
   const [updateAnswerInputValue, setUpdateAnswerInputValue] = useState<string>('');
+  const httpService = new HttpService();
 
   const handleUpdateCardSubmit = async (id: string | undefined) => {
     const requestBody = {
@@ -20,13 +24,8 @@ export default function UpdateCardModal(props: {
       answer: updateAnswerInputValue,
     };
 
-    const requestOptions = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards/${id}`, requestOptions);
+      const res = await httpService.make_request(requestBody, `cards/${id}`, 'PUT');
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -42,7 +41,7 @@ export default function UpdateCardModal(props: {
 
   useEffect(() => {
     if (props.isUpdateCardOpen && props.cardToModify) {
-      setUpdateHintInputValue(props.cardToModify.hint);
+      setUpdateHintInputValue(props.cardToModify.clue);
       setUpdateAnswerInputValue(props.cardToModify.answer);
     }
   }, [props.cardToModify, props.isUpdateCardOpen]);
@@ -82,7 +81,7 @@ export default function UpdateCardModal(props: {
           {updateCardsError && <p className="text-red-500">Error: {updateCardsError}</p>}
           <Button
             onClick={() => {
-              handleUpdateCardSubmit(props.cardToModify?.id);
+              handleUpdateCardSubmit(props.cardToModify?.cardId);
             }}
           >
             Save

@@ -1,6 +1,6 @@
 export interface Flashcard {
-  id: string;
-  hint: string;
+  cardId: string;
+  clue: string;
   answer: string;
   isReadyToReview: string;
 }

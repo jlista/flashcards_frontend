@@ -1,219 +1,255 @@
 'use client';
 
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-import Button from './button';
-import Card from './card';
+import { useUser } from './context/user_context';
+import Card from './ui/card';
 
-interface DaysAgoProps {
-  date: Date | null;
-}
-function DaysAgo(props: DaysAgoProps) {
-  const today = new Date();
-  let timeDeltaStr = '';
-  if (props.date != null) {
-    const datediff = today.getTime() - new Date(props.date).getTime();
-    const daysAgo = Math.floor(datediff / (24 * 60 * 60 * 1000));
-    const hoursAgo = Math.floor(datediff / (60 * 60 * 1000));
-    const minutesAgo = Math.floor(datediff / (60 * 1000));
-    if (daysAgo == 1) {
-      timeDeltaStr = 'Yesterday';
-    } else if (daysAgo > 1) {
-      timeDeltaStr = daysAgo.toString() + ' days ago';
-    } else if (hoursAgo == 1) {
-      timeDeltaStr = '1 hour ago';
-    } else if (hoursAgo > 1) {
-      timeDeltaStr = hoursAgo.toString() + ' hours ago';
-    } else if (minutesAgo <= 1) {
-      timeDeltaStr = 'Just now';
-    } else {
-      timeDeltaStr = minutesAgo.toString() + ' minutes ago';
-    }
-  } else {
-    timeDeltaStr = 'Never';
-  }
-  return <div>{timeDeltaStr}</div>;
-}
+export default function Review() {
+  const router = useRouter();
+  const { user, setUser } = useUser();
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
+  const [usernameInputVal, setUsernameInputVal] = useState<string>('');
+  const [passwordInputVal, setPasswordInputVal] = useState<string>('');
+  const [confirmPasswordInputVal, setConfirmPasswordInputVal] = useState<string>('');
+  const [emailInputVal, setEmailnameInputVal] = useState<string>('');
 
-interface MasteryScaleProps {
-  masteryLevel: number;
-}
-function MasteryScale(props: MasteryScaleProps) {
-  if (props.masteryLevel == 0) {
-    return <Image src="/progress_slider1.png" alt="level 1" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 1) {
-    return <Image src="/progress_slider2.png" alt="level 2" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 2) {
-    return <Image src="/progress_slider3.png" alt="level 3" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 3) {
-    return <Image src="/progress_slider4.png" alt="level 4" width="75" height="35" priority />;
-  }
-  if (props.masteryLevel == 4) {
-    return <Image src="/progress_slider5.png" alt="level 5" width="75" height="35" priority />;
-  }
-}
-
-export default function Home() {
-  const [noMoreCards, setNoMoreCards] = useState<boolean>(false);
-  const [currentCardId, setCurrentCardId] = useState<string>('');
-  const [currentCardHint, setCurrentCardHint] = useState<string | null>(null);
-  const [currentCardAnswer, setCurrentCardAnswer] = useState<string>('');
-  const [currentCardLastCorrect, setCurrentCardLastCorrect] = useState<Date | null>(null);
-  const [currentCardStreak, setCurrentCardStreak] = useState<number>(0);
-  const [currentCardMasteryLevel, setCurrentCardMasteryLevel] = useState<number>(0);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [showAnswer, setShowAnswer] = useState<boolean>(false);
-
-  const toggleShowAnswer = () => {
-    setShowAnswer(true);
-  };
-
-  const getNewCard = async (lastCardId: string | null) => {
-    setLoading(true);
-    setError(null);
-    setNoMoreCards(false);
-    setCurrentCardHint(null);
-    setCurrentCardId('');
-    setCurrentCardAnswer('');
-    setCurrentCardLastCorrect(null);
-    setCurrentCardStreak(0);
-    setCurrentCardMasteryLevel(0);
-    setShowAnswer(false);
-
+  const handleLogin = async () => {
+    let success = false;
     try {
-      let res;
-      if (lastCardId == null) {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr`);
-      } else {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr?lastAnswered=${lastCardId}`);
-      }
-      if (!res.ok && res.status != 404) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      if (res.status == 404) {
-        setNoMoreCards(true);
-      } else {
-        const data = await res.json();
-        setCurrentCardHint(data['hint']);
-        setCurrentCardAnswer(data['answer']);
-        setCurrentCardId(data['id']);
-        setCurrentCardLastCorrect(data['lastCorrect']);
-        setCurrentCardStreak(data['streak']);
-        setCurrentCardMasteryLevel(data['masteryLevel']);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const requestBody = {
+        username: usernameInputVal,
+        password: passwordInputVal,
+      };
+      const requestOptions: RequestInit = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      };
+      const res = await fetch(`http://localhost:8000/api/users/login`, requestOptions);
 
-  const answerCard = async (id: string, isCorrect: boolean) => {
-    setLoading(true);
-    setError(null);
-    const requestOptions = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(isCorrect),
-    };
-    try {
-      const res = await fetch(`http://localhost:8080/api/cards/answer?id=${id}`, requestOptions);
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        throw new Error('Could not log in, please try again');
+      } else {
+        const authDTO = await res.json();
+        const userObj = {
+          username: usernameInputVal,
+          userId: authDTO['userId'],
+          token: authDTO['token'],
+        };
+        setUser(userObj);
+        success = true;
       }
-      getNewCard(id);
     } catch (err: any) {
-      setError(err.message);
+      setLoginError(err.message);
     } finally {
-      setLoading(false);
+      if (success) {
+        router.push('/my_decks');
+      }
     }
   };
 
-  useEffect(() => {
-    getNewCard(null);
-  }, []);
+  const handleRegister = async (e: any) => {
+    if (passwordInputVal != confirmPasswordInputVal) {
+      setLoginError('Passwords must match');
+      return;
+    }
+
+    let success = false;
+    try {
+      const requestBody = {
+        username: usernameInputVal,
+        password: passwordInputVal,
+        confirmPassword: confirmPasswordInputVal,
+        email: emailInputVal,
+      };
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      };
+      const res = await fetch(`http://localhost:8000/api/users/signup`, requestOptions);
+
+      if (!res.ok) {
+        throw new Error('Could not register, please try again');
+      } else {
+        const authDTO = await res.json();
+        const userObj = {
+          username: usernameInputVal,
+          userId: authDTO['userId'],
+          token: authDTO['token'],
+        };
+        setUser(userObj);
+        success = true;
+      }
+    } catch (err: any) {
+      setLoginError(err.message);
+    } finally {
+      if (success) {
+        router.push('/my_decks');
+      }
+    }
+  };
+
+  const handleUsernameChange = (e: any) => {
+    setUsernameInputVal(e.target.value);
+  };
+
+  const handlePasswordChange = (e: any) => {
+    setPasswordInputVal(e.target.value);
+  };
+
+  const handleConfirmPasswordChange = (e: any) => {
+    setConfirmPasswordInputVal(e.target.value);
+  };
+
+  const handleEmailChange = (e: any) => {
+    setEmailnameInputVal(e.target.value);
+  };
 
   return (
-    <div className="justify-self-center w-140 h-90 p-8">
+    <div className="justify-self-center w-140 p-8">
       <Card>
-        {loading ? (
-          <div role="status" className="max-w-sm animate-pulse w-full h-50">
-            <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4 mt-2"></div>
-            <hr className="mb-2 opacity-30"></hr>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5 mt-4"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[270px] mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[240px] mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px]"></div>
-            <span className="sr-only">Loading...</span>
-          </div>
-        ) : (
-          <div className="flex flex-col w-full">
-            <div className="flex flex-col flex-none w-full h-13">
-              <h1 className="text-2xl font-bold mb-1">
-                {error && <p className="text-red-500">Error: {error}</p>}
-                {noMoreCards && (
-                  <p className="text-inherit-300">{`You've gone through all your cards for now, come back later!`}</p>
-                )}
-                {currentCardHint && <p className="text-inherit-600"> {currentCardHint}</p>}
-              </h1>
-              <hr className="opacity-30"></hr>
-            </div>
-            <div className="flex flex-row flex-1 w-full grow text-inherit-600 overflow-auto">
-              <div className="flex flex-col flex-1 h-full grow overflow-auto">
-                <div className="flex flex-1 w-full grow overflow-auto wrap-anywhere">
-                  <div className="grow overflow-auto">
-                    {showAnswer && (
-                      <div>
-                        {currentCardAnswer && <p className="text-inherit-600 wrap-break-word">{currentCardAnswer}</p>}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-none w-full h-15">
-                  {showAnswer ? (
-                    <div>
-                      <Button
-                        onClick={() => {
-                          answerCard(currentCardId, true);
-                        }}
-                      >
-                        Correct
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          answerCard(currentCardId, false);
-                        }}
-                      >
-                        Incorrect
-                      </Button>
-                    </div>
-                  ) : (
-                    <div>{!noMoreCards && <Button onClick={toggleShowAnswer}>Show Answer</Button>}</div>
-                  )}
-                </div>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold mb-1">Please login or create an account</h1>
+          <hr className="mb-2 opacity-30" />
+          {loginError && <p>{loginError}</p>}
+          {isLoginMode ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin();
+              }}
+            >
+              <div className="mb-5">
+                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  value={usernameInputVal}
+                  onChange={(e) => {
+                    handleUsernameChange(e);
+                  }}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
               </div>
-              <div className="flex flex-none h-full ml-5">
-                {!noMoreCards && (
-                  <div className="text-neutral-400 text-sm antialiased place-self-end">
-                    <div>
-                      Mastery Level: <MasteryScale masteryLevel={currentCardMasteryLevel}></MasteryScale>
-                    </div>
-                    <div>Streak: {currentCardStreak}</div>
-                    <div>
-                      Last Correct: <DaysAgo date={currentCardLastCorrect}></DaysAgo>
-                    </div>
-                  </div>
-                )}
+              <div className="mb-5">
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={passwordInputVal}
+                  onChange={handlePasswordChange}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
               </div>
-            </div>
-          </div>
-        )}
+
+              <button
+                type="submit"
+                className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 cursor-pointer"
+              >
+                Login
+              </button>
+              <span className="mt-2 ml-2">
+                Don't have an account?{' '}
+                <u className="cursor-pointer"
+                  onClick={() => {
+                    setIsLoginMode(false);
+                  }}
+                >
+                  Sign Up
+                </u>
+              </span>
+            </form>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleRegister(e);
+              }}
+            >
+              <div className="mb-5">
+                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  value={usernameInputVal}
+                  onChange={(e) => {
+                    handleUsernameChange(e);
+                  }}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div className="mb-5">
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={passwordInputVal}
+                  onChange={handlePasswordChange}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div className="mb-5">
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  value={confirmPasswordInputVal}
+                  onChange={handleConfirmPasswordChange}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div className="mb-5">
+                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={emailInputVal}
+                  onChange={handleEmailChange}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 m-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 cursor-pointer"
+              >
+                Register
+              </button>
+              <span className="mt-2 ml-2">
+                Already have an account?{' '}
+                <u className="cursor-pointer"
+                  onClick={() => {
+                    setIsLoginMode(true);
+                  }}
+                >
+                  Log In
+                </u>
+              </span>
+            </form>
+          )}
+        </div>
       </Card>
     </div>
   );

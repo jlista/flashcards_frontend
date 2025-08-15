@@ -37,4 +37,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Run Linter
 
-npx eslint .tsx --fix
+npx eslint --ext .tsx --fix
