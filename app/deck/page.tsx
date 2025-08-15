@@ -12,6 +12,7 @@ import AddCardModal from './add_card_modal';
 import CardDetail from './card_detail';
 import DeleteCardModal from './delete_card_modal';
 import UpdateCardModal from './update_card_modal';
+import { HttpService } from '../service/http_service';
 
 export default function Deck() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function Deck() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
   const [isUpdateCardOpen, setIsUpdateCardOpen] = useState(false);
+  const httpService = new HttpService();
 
   const promptCardDeletion = (id: string) => {
     setCardToModify(
@@ -49,11 +51,12 @@ export default function Deck() {
     setAllCards([]);
 
     try {
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      };
-      const res = await fetch(`http://localhost:8080/api/cards?userDeckId=${deck?.userDeckId}`, requestOptions);
+      const res = await httpService.make_get_request(`cards?userDeckId=${deck?.userDeckId}`)
+      // const requestOptions = {
+      //   method: 'GET',
+      //   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
+      // };
+      // const res = await fetch(`http://localhost:8080/api/cards?userDeckId=${deck?.userDeckId}`, requestOptions);
 
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);

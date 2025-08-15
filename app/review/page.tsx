@@ -9,7 +9,7 @@ import { DeckCard } from '../model/deck_card';
 import Button from '../ui/button';
 import Card from '../ui/card';
 import CardStats from './card_stats';
-
+import { HttpService } from '../service/http_service';
 export default function Review() {
   const router = useRouter();
   const { user, setUser } = useUser();
@@ -19,6 +19,7 @@ export default function Review() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const httpService = new HttpService();
 
   const toggleShowAnswer = () => {
     setShowAnswer(true);
@@ -32,18 +33,11 @@ export default function Review() {
     setShowAnswer(false);
 
     try {
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      };
       let res;
       if (lastCardId == null) {
-        res = await fetch(`http://localhost:8080/api/cards/randomsr?userDeckId=${deck?.userDeckId}`, requestOptions);
+        res = await httpService.make_get_request(`cards/randomsr?userDeckId=${deck?.userDeckId}`);
       } else {
-        res = await fetch(
-          `http://localhost:8080/api/cards/randomsr?userDeckId=${deck?.userDeckId}&lastAnswered=${lastCardId}`,
-          requestOptions
-        );
+        res = await httpService.make_get_request(`cards/randomsr?userDeckId=${deck?.userDeckId}&lastAnswered=${lastCardId}`);
       }
       if (!res.ok && res.status != 404) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -64,16 +58,8 @@ export default function Review() {
   const answerCard = async (id: number, isCorrect: boolean) => {
     setLoading(true);
     setError(null);
-    const requestOptions = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      body: JSON.stringify(isCorrect),
-    };
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/cards/answer?cardId=${id}&userDeckId=${deck?.userDeckId}`,
-        requestOptions
-      );
+      const res = await httpService.make_request(isCorrect, `cards/answer?cardId=${id}&userDeckId=${deck?.userDeckId}`, 'PUT')
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

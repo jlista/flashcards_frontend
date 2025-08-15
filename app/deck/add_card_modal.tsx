@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { useUser } from '../context/user_context';
 import Button from '../ui/button';
+import { HttpService } from '../service/http_service';
 
 export default function AddCardModal(props: {
   deckId: number | undefined;
@@ -14,23 +15,15 @@ export default function AddCardModal(props: {
   const [addCardsError, setAddCardsError] = useState<string | null>(null);
   const [addHintInputValue, setAddHintInputValue] = useState<string>('');
   const [addAnswerInputValue, setAddAnswerInputValue] = useState<string>('');
+  const httpService = new HttpService();
 
   const handleNewCardSubmit = async () => {
     const requestBody = {
       hint: addHintInputValue,
       answer: addAnswerInputValue,
     };
-
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      body: JSON.stringify(requestBody),
-    };
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/cards?deckId=${props.deckId}&userId=${user?.userId}`,
-        requestOptions
-      );
+      const res = await httpService.make_request(requestBody, `cards?deckId=${props.deckId}&userId=${user?.userId}`, 'POST');
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

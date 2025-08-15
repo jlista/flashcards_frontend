@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { useUser } from '../context/user_context';
 import Button from '../ui/button';
+import { HttpService } from '../service/http_service';
 
 export default function AddDeckModal(props: {
   isAddDeckOpen: boolean;
@@ -13,6 +14,7 @@ export default function AddDeckModal(props: {
   const [addDeckError, setAddDeckError] = useState<string | null>(null);
   const [deckNameInputValue, setDeckNameInputValue] = useState<string>('');
   const [deckDescInputValue, setDeckDescInputValue] = useState<string>('');
+  const httpService = new HttpService()
 
   const handleNewDeckSubmit = async () => {
     const requestBody = {
@@ -20,16 +22,9 @@ export default function AddDeckModal(props: {
       description: deckDescInputValue,
     };
 
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      body: JSON.stringify(requestBody),
-    };
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/decks?userId=${user?.userId}`,
-        requestOptions
-      );
+      const res = await httpService.make_request(requestBody, `decks?userId=${user?.userId}`, 'POST');
+
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

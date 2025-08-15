@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useUser } from '../context/user_context';
 import Button from '../ui/button';
 import { Deck } from '../model/deck';
+import { HttpService } from '../service/http_service';
 
 export default function EditDeckModal(props: {
   isEditDeckOpen: boolean;
@@ -15,6 +16,7 @@ export default function EditDeckModal(props: {
   const [editDeckError, setEditDeckError] = useState<string | null>(null);
   const [deckNameInputValue, setDeckNameInputValue] = useState<string>('');
   const [deckDescInputValue, setDeckDescInputValue] = useState<string>('');
+  const httpService = new HttpService();
 
   const handleEditDeckSubmit = async () => {
     const requestBody = {
@@ -22,16 +24,8 @@ export default function EditDeckModal(props: {
       description: deckDescInputValue,
     };
 
-    const requestOptions = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      body: JSON.stringify(requestBody),
-    };
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/decks?deckId=${props.deckToModify?.deckId}`,
-        requestOptions
-      );
+      const res = await httpService.make_request(requestBody, `decks?deckId=${props.deckToModify?.deckId}`, 'PUT');
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -44,13 +38,13 @@ export default function EditDeckModal(props: {
     }
   };
 
-    useEffect(() => {
-        if (props.isEditDeckOpen && props.deckToModify) {
-        setDeckNameInputValue(props.deckToModify.deck_name);
-        setDeckDescInputValue(props.deckToModify.deck_desc);
-        setEditDeckError(null);
-        }
-    }, [props.deckToModify, props.isEditDeckOpen]);
+  useEffect(() => {
+      if (props.isEditDeckOpen && props.deckToModify) {
+      setDeckNameInputValue(props.deckToModify.deck_name);
+      setDeckDescInputValue(props.deckToModify.deck_desc);
+      setEditDeckError(null);
+      }
+  }, [props.deckToModify, props.isEditDeckOpen]);
 
   return (
     <Dialog open={props.isEditDeckOpen} onClose={() => props.onClose()} className="relative z-50">

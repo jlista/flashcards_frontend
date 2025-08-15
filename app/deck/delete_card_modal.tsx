@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useUser } from '../context/user_context';
 import { Flashcard } from '../model/flashcard';
 import Button from '../ui/button';
+import { HttpService } from '../service/http_service';
 
 export default function DeleteCardModal(props: {
   cardToDelete: Flashcard | undefined;
@@ -13,14 +14,11 @@ export default function DeleteCardModal(props: {
 }) {
   const { user, setUser } = useUser();
   const [deleteCardsError, setDeleteCardsError] = useState<string | null>(null);
+  const httpService = new HttpService();
 
   const deleteCard = async (id: string | undefined) => {
-    const requestOptions = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-    };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards/${id}`, requestOptions);
+      const res = await httpService.make_request(null, `cards/${id}`, 'DELETE');
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

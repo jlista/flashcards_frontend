@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useUser } from '../context/user_context';
 import { Flashcard } from '../model/flashcard';
 import Button from '../ui/button';
+import { HttpService } from '../service/http_service';
 
 export default function UpdateCardModal(props: {
   cardToModify: Flashcard | undefined;
@@ -15,6 +16,7 @@ export default function UpdateCardModal(props: {
   const [updateCardsError, setUpdateCardsError] = useState<string | null>(null);
   const [updateHintInputValue, setUpdateHintInputValue] = useState<string>('');
   const [updateAnswerInputValue, setUpdateAnswerInputValue] = useState<string>('');
+  const httpService = new HttpService();
 
   const handleUpdateCardSubmit = async (id: string | undefined) => {
     const requestBody = {
@@ -22,13 +24,8 @@ export default function UpdateCardModal(props: {
       answer: updateAnswerInputValue,
     };
 
-    const requestOptions = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      body: JSON.stringify(requestBody),
-    };
     try {
-      const res = await fetch(`http://localhost:8080/api/cards/${id}`, requestOptions);
+      const res = await httpService.make_request(requestBody, `cards/${id}`, 'PUT');
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

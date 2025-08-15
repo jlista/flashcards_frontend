@@ -11,6 +11,7 @@ import Card from '../ui/card';
 import DeckDetail from './deck_detail';
 import AddDeckModal from './add_deck_modal';
 import EditDeckModal from './edit_deck_modal';
+import { HttpService } from '../service/http_service';
 
 export default function MyDecks() {
   const { user, setUser } = useUser();
@@ -21,16 +22,13 @@ export default function MyDecks() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isAddDeckOpen, setIsAddDeckOpen] = useState<boolean>(false);
   const [isEditDeckOpen, setIsEditDeckOpen] = useState<boolean>(false);
+  const httpService = new HttpService();
 
   const getUserDecks = async () => {
     setError(null);
     setLoading(true);
     try {
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.token}` },
-      };
-      const res = await fetch(`http://localhost:8080/api/decks/userdecks?userId=${user?.userId}`, requestOptions);
+      const res = await httpService.make_get_request(`decks/userdecks?userId=${user?.userId}`)
 
       if (!res.ok) {
         throw new Error('No decks found');
@@ -67,7 +65,7 @@ export default function MyDecks() {
     } else {
       router.replace('/');
     }
-  }, []);
+  }, [user?.userId]);
 
   return (
     <div>
@@ -87,46 +85,50 @@ export default function MyDecks() {
 
       )
       :(
-      <div className="flex flex-row w-full h-full gap-10">
-        <p className="text-l">  My Decks</p>
-        <div className="mt-12 divide-y divide-gray-200 dark:divide-gray-700 flex-1 grow">
-          {error ? (
-            <p className="text-red-500">Error: {error}</p>
-          ) : (
-            <ul>
-              {decks.map((element: Deck) => {
-                return (
-                  <DeckDetail
-                    key={element.userDeckId}
-                    deck={element}
-                    onSelect={(deck: Deck) => { setDeck(deck)}}
-                    onEdit={(deck: Deck) => { handleEditDeckBefore(deck)}}
-                  ></DeckDetail>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-        <div className="flex flex-none w-60 h-full justify-center">
-          <div className="fixed mt-16">
-            <Card>
-              <div className="flex flex-col">
-                <Button onClick = {() => setIsAddDeckOpen(true)}>
-                  New Deck
-                </Button>
-                {deck && (
-                  <div>
-                    <p>{deck.deck_name}</p>
-                    <p># Cards: ...</p>
-                    <Button onClick={() => router.replace('/review')}>Review Deck</Button>
-                    <Button onClick={() => router.replace('/deck')}>Add/Edit Cards</Button>
-                  </div>
-                )}
+        <div>
+          <p className="text-l">  My Decks</p>
+          <div className="flex flex-row w-full h-full gap-10">
+            <div className="flex flex-1">
+             {error ? (
+             <p className="text-red-500">Error: {error}</p>
+           ) : (
+             <ul className="w-full">
+               {decks.map((element: Deck) => {
+                 return (
+                   <DeckDetail
+                     key={element.userDeckId}
+                     deck={element}
+                     onSelect={(deck: Deck) => { setDeck(deck)}}
+                     onEdit={(deck: Deck) => { handleEditDeckBefore(deck)}}
+                   ></DeckDetail>
+                 );
+               })}
+             </ul>
+           )}
+            </div>
+            <div className="flex align-right w-60 flex-none">
+              <div className="fixed w-60">
+              <Card>
+                  <div className="flex flex-col">
+                 <Button onClick = {() => setIsAddDeckOpen(true)}>
+                   New Deck
+                 </Button>
+                 {deck && (
+                   <div>
+                     <p>{deck.deck_name}</p>
+                     <p># Cards: ...</p>
+                     <Button onClick={() => router.replace('/review')}>Review Deck</Button>
+                     <Button onClick={() => router.replace('/deck')}>Add/Edit Cards</Button>
+                   </div>
+                 )}
+               </div>
+              </Card>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
-      </div>)}
+      )}
     </div>
+
   );
 }

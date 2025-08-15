@@ -23,12 +23,12 @@ export default function Review() {
         username: usernameInputVal,
         password: passwordInputVal,
       };
-      const requestOptions = {
+      const requestOptions: RequestInit = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(requestBody)
       };
-      const res = await fetch(`http://localhost:8080/api/users/login`, requestOptions);
+      const res = await fetch(`http://localhost:8000/api/users/login`, requestOptions);
 
       if (!res.ok) {
         throw new Error('Could not log in, please try again');
@@ -70,7 +70,7 @@ export default function Review() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       };
-      const res = await fetch(`http://localhost:8080/api/users/signup`, requestOptions);
+      const res = await fetch(`http://localhost:8000/api/users/signup`, requestOptions);
 
       if (!res.ok) {
         throw new Error('Could not register, please try again');
@@ -160,7 +160,7 @@ export default function Review() {
               </button>
               <span className="mt-2 ml-2">
                 Don't have an account?{' '}
-                <u
+                <u className="cursor-pointer"
                   onClick={() => {
                     setIsLoginMode(false);
                   }}
@@ -239,7 +239,7 @@ export default function Review() {
               </button>
               <span className="mt-2 ml-2">
                 Already have an account?{' '}
-                <u
+                <u className="cursor-pointer"
                   onClick={() => {
                     setIsLoginMode(true);
                   }}
