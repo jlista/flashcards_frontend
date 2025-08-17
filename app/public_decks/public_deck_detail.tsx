@@ -40,7 +40,6 @@ export default function PublicDeckDetail(
         <div className="pb-3 ml-3 sm:pb-2 sm:pt-2 flex flex-row space-x-2 rtl:space-x-reverse">
           <div className="w-7 mt-2 justify-center" onClick={handleEdit}>
             E
-
           </div>
           <div className="flex-1 w-full min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{props.deck.name}</p>

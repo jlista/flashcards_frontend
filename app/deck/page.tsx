@@ -93,7 +93,7 @@ export default function Deck() {
 
   return (
     <div>
-      {user?.username}
+      {deck?.name}
       <DeleteCardModal
         isDeleteConfirmOpen={isDeleteConfirmOpen}
         cardToDelete={cardToModify}
@@ -123,10 +123,8 @@ export default function Deck() {
                 return (
                   <CardDetail
                     key={element['cardId']}
-                    id={element['cardId']}
-                    hint={element['clue']}
-                    answer={element['answer']}
-                    isReadyToReview={element['isReadyToReview']}
+                    card={element}
+                    isPublic={deck?.public}
                     onCardUpdate={(id: string) => handleEditCard(id)}
                     onCardDelete={(id: string) => promptCardDeletion(id)}
                   ></CardDetail>
@@ -140,7 +138,9 @@ export default function Deck() {
             <Card>
               <div className="flex flex-col">
                 <Button onClick={() => router.replace('/review')}>Review Deck</Button>
-                <Button onClick={() => setIsAddCardOpen(true)}>Add Card</Button>
+                {deck?.public &&
+                  <Button onClick={() => setIsAddCardOpen(true)}>Add Card</Button>
+                }
                 <p># cards: {allCards.length}</p>
                 <p># ready: {numCardsReady}</p>
               </div>
