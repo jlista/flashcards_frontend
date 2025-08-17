@@ -131,7 +131,12 @@ export default function MyDecks() {
                      <p># Cards: ...</p>
                      <Button onClick={() => router.replace('/review')}>Review Deck</Button>
                      <Button onClick={() => router.replace('/deck')}>Cards</Button>
-                     <Button onClick={() => setIsShareDeckOpen(true)}>Make Deck Public</Button>
+                     {!deck?.public ? (  
+                        <Button onClick={() => setIsShareDeckOpen(true)}>Make Deck Public</Button>
+                      ):(
+                        <Button onClick={() => {}}>Clone Deck</Button>
+                      )
+                     }
                    </div>
                  )}
                </div>

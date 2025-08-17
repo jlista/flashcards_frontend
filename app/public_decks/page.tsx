@@ -24,7 +24,7 @@ export default function PublicDecks() {
     setError(null);
     setLoading(true);
     try {
-      const res = await httpService.make_get_request(`decks/public`)
+      const res = await httpService.make_get_request(`decks/public?userId=${user?.userId}`)
 
       if (!res.ok) {
         throw new Error('No decks found');
@@ -54,7 +54,6 @@ export default function PublicDecks() {
     <div>
       {(!error && decks.length == 0) ? (
                 <p className="text-l">  Could not find any decks.</p>
-
       )
       :(
         <div>
