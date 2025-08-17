@@ -12,6 +12,7 @@ import DeckDetail from './deck_detail';
 import AddDeckModal from './add_deck_modal';
 import EditDeckModal from './edit_deck_modal';
 import { HttpService } from '../service/http_service';
+import ShareDeckModal from './share_deck_modal';
 
 export default function MyDecks() {
   const { user, setUser } = useUser();
@@ -22,6 +23,7 @@ export default function MyDecks() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isAddDeckOpen, setIsAddDeckOpen] = useState<boolean>(false);
   const [isEditDeckOpen, setIsEditDeckOpen] = useState<boolean>(false);
+  const [isShareDeckOpen, setIsShareDeckOpen] = useState<boolean>(false);
   const httpService = new HttpService();
 
   const getUserDecks = async () => {
@@ -58,6 +60,11 @@ export default function MyDecks() {
     getUserDecks();
   }
 
+  const handleShareDeckAfter = () => {
+    setIsShareDeckOpen(false);
+    getUserDecks();
+  }
+
   useEffect(() => {
     if (user?.userId) {
       setDeck(null);
@@ -80,6 +87,11 @@ export default function MyDecks() {
         onDeckEdit={() => handleEditDeckAfter()}
         onClose={() => setIsEditDeckOpen(false)}
       ></EditDeckModal>
+      <ShareDeckModal
+        isShareDeckOpen={isShareDeckOpen}
+        onDeckShare={() => handleShareDeckAfter()}
+        onClose={() => setIsShareDeckOpen(false)}
+      ></ShareDeckModal>
       {(!error && decks.length == 0) ? (
                 <p className="text-l">  You don't have any decks. <u onClick={() => {setIsAddDeckOpen(true)}}>Create a deck</u> to get started.</p>
 
@@ -115,10 +127,11 @@ export default function MyDecks() {
                  </Button>
                  {deck && (
                    <div>
-                     <p>{deck.deck_name}</p>
+                     <p>{deck.name}</p>
                      <p># Cards: ...</p>
                      <Button onClick={() => router.replace('/review')}>Review Deck</Button>
-                     <Button onClick={() => router.replace('/deck')}>Add/Edit Cards</Button>
+                     <Button onClick={() => router.replace('/deck')}>Cards</Button>
+                     <Button onClick={() => setIsShareDeckOpen(true)}>Make Deck Public</Button>
                    </div>
                  )}
                </div>

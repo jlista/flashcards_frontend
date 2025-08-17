@@ -40,8 +40,8 @@ export default function EditDeckModal(props: {
 
   useEffect(() => {
       if (props.isEditDeckOpen && props.deckToModify) {
-      setDeckNameInputValue(props.deckToModify.deck_name);
-      setDeckDescInputValue(props.deckToModify.deck_desc);
+      setDeckNameInputValue(props.deckToModify.name);
+      setDeckDescInputValue(props.deckToModify.description);
       setEditDeckError(null);
       }
   }, [props.deckToModify, props.isEditDeckOpen]);
@@ -50,7 +50,7 @@ export default function EditDeckModal(props: {
     <Dialog open={props.isEditDeckOpen} onClose={() => props.onClose()} className="relative z-50">
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel className="max-w-lg min-w-lg space-y-4 border border-gray-500 p-12 bg-gray-800 rounded-xl shadow-lg">
-          <DialogTitle className="font-bold">Editing Deck: {props.deckToModify?.deck_name}</DialogTitle>
+          <DialogTitle className="font-bold">Editing Deck: {props.deckToModify?.name}</DialogTitle>
           <div className="mb-6">
             <label htmlFor="add-hint-input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
               Hint
