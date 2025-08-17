@@ -4,7 +4,6 @@ const baseUrl = "api/";
 
 export class HttpService{
 
-
     async make_request(requestBody: any, url: string, method: string): Promise<Response>{
 
         const requestOptions: RequestInit = {

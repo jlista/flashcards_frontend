@@ -1,21 +1,31 @@
 'use client';
 
 import { useDeck } from '../context/deck_context';
+import { useUser } from '../context/user_context';
 import { Deck } from '../model/deck';
+import { HttpService } from '../service/http_service';
 
-
-export default function DeckDetail(
+export default function PublicDeckDetail(
   props: { 
     key: number; 
     deck: Deck; 
-    onSelect: (deck: Deck) => void;
+    onCopy: (deck: Deck) => void;
     onEdit: (deck: Deck) => void;
   }
 ) {
-
+    const httpService = new HttpService();
+    const { user, setUser } = useUser();
     const { deck, setDeck } = useDeck();
-    const handleSelect = () => {
-      props.onSelect(props.deck);
+    const handleCopy = async () => {
+
+      try {
+        const res = await httpService.make_request(null, `decks/copy?deckId=${props.deck?.deckId}&userId=${user?.userId}`, 'POST')
+
+      } catch (err: any) {
+
+      } finally {
+        //props.onCopy(props.deck);
+      }
     };
 
     const handleEdit = () => {
@@ -32,10 +42,11 @@ export default function DeckDetail(
             E
 
           </div>
-          <div className="flex-1 w-full min-w-0" onClick={handleSelect}>
+          <div className="flex-1 w-full min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{props.deck.name}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 wrap-break-word">{props.deck.description}</p>
           </div>
+          <div className="justify-right mr-3" onClick={handleCopy}>Copy</div>
         </div>
       </li>
     );
