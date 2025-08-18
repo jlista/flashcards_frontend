@@ -13,6 +13,8 @@ import AddDeckModal from './add_deck_modal';
 import EditDeckModal from './edit_deck_modal';
 import { HttpService } from '../service/http_service';
 import ShareDeckModal from './share_deck_modal';
+import CloneDeckModal from './clone_deck_modal';
+import DeleteDeckModal from './delete_deck_modal';
 
 export default function MyDecks() {
   const { user, setUser } = useUser();
@@ -24,6 +26,9 @@ export default function MyDecks() {
   const [isAddDeckOpen, setIsAddDeckOpen] = useState<boolean>(false);
   const [isEditDeckOpen, setIsEditDeckOpen] = useState<boolean>(false);
   const [isShareDeckOpen, setIsShareDeckOpen] = useState<boolean>(false);
+  const [isCloneDeckOpen, setIsCloneDeckOpen] = useState<boolean>(false);
+  const [isDeleteDeckOpen, setIsDeleteDeckOpen] = useState<boolean>(false);
+
   const httpService = new HttpService();
 
   const getUserDecks = async () => {
@@ -65,6 +70,16 @@ export default function MyDecks() {
     getUserDecks();
   }
 
+  const handleCloneDeckAfter = () => {
+    setIsCloneDeckOpen(false);
+    getUserDecks();
+  }
+
+  const handleDeleteDeckAfter = () => {
+    setIsDeleteDeckOpen(false);
+    getUserDecks();
+  }
+
   useEffect(() => {
     if (user?.userId) {
       setDeck(null);
@@ -92,6 +107,17 @@ export default function MyDecks() {
         onDeckShare={() => handleShareDeckAfter()}
         onClose={() => setIsShareDeckOpen(false)}
       ></ShareDeckModal>
+      <CloneDeckModal
+        isCloneDeckOpen={isCloneDeckOpen}
+        deckToClone={deck}
+        onDeckClone={() => handleCloneDeckAfter()}
+        onClose={() => setIsCloneDeckOpen(false)}
+      ></CloneDeckModal>
+      <DeleteDeckModal
+        isDeleteDeckOpen={isDeleteDeckOpen}
+        onDeckDelete={() => handleDeleteDeckAfter()}
+        onClose={() => setIsDeleteDeckOpen(false)}
+      ></DeleteDeckModal>
       {(!error && decks.length == 0) ? (
                 <p className="text-l">  You don't have any decks. <u onClick={() => {setIsAddDeckOpen(true)}}>Create a deck</u> to get started.</p>
 
@@ -134,9 +160,10 @@ export default function MyDecks() {
                      {!deck?.public ? (  
                         <Button onClick={() => setIsShareDeckOpen(true)}>Make Deck Public</Button>
                       ):(
-                        <Button onClick={() => {}}>Clone Deck</Button>
+                        <Button onClick={() => setIsCloneDeckOpen(true)}>Clone Deck</Button>
                       )
                      }
+                     <Button onClick={() => setIsDeleteDeckOpen(true)}>Delete Deck</Button>
                    </div>
                  )}
                </div>
