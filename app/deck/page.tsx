@@ -138,7 +138,7 @@ export default function Deck() {
             <Card>
               <div className="flex flex-col">
                 <Button onClick={() => router.replace('/review')}>Review Deck</Button>
-                {deck?.public &&
+                {!deck?.public &&
                   <Button onClick={() => setIsAddCardOpen(true)}>Add Card</Button>
                 }
                 <p># cards: {allCards.length}</p>
