@@ -5,10 +5,17 @@ export interface Stats{
     totalIncorrect: number;
     percentCorrect: number;
     dailyStats: Array<DailyStats>;
+    deckStats: CardStats;
 }
 
 export interface DailyStats{
     dateStamp: string;
     numCorrect: number;
     numIncorrect: number;
+}
+
+export interface CardStats{
+    numDecks: number;
+    numCards: number;
+    cardsByMastery: Array<number>;
 }
